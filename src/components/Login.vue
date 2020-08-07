@@ -53,53 +53,53 @@ export default {
     return {
       // loginForm是登录表单的数据绑定对象
       loginForm: {
-        username: "admin",
-        password: "123456"
+        username: 'admin',
+        password: '123456'
       },
       // loginFormRules是表单的验证规则对象
       loginFormRules: {
         // 验证用户名是否合法
         username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
         ],
         // 验证密码是是否合法
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { min: 6, max: 16, message: "长度在 9 到 16 个字符", trigger: "blur" }
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 16, message: '长度在 9 到 16 个字符', trigger: 'blur' }
         ]
       }
-    };
+    }
   },
 
   methods: {
     resetLoginForm() {
       // 单文件组件中this获取到当前单文件组件，this.$refs.loginFormRef获取到表单对象，使用表单对象的resetFields()方法即可重置表单。
       // 当方法绑定在点击事件上的时候，方法中的this指向的是全局对象，在html文件和js文件中指向window对象；在vue组件中，指向此vue组件实例。
-      this.$refs.loginFormRef.resetFields();
+      this.$refs.loginFormRef.resetFields()
     },
     login() {
       // validate是form组件的方法，其中的valid形参代表的是一个布尔值（验证是否合法的结果）
       this.$refs.loginFormRef.validate(async (valid, a) => {
-        if (!valid) return;
+        if (!valid) return
         // main.js中配置好了，this.$http可以直接发送请求；this.loginForm可以直接获取到表单对象。
         // axios发送请求会返回一个promise对象
         // const ret = this.$http.post('/login', this.loginForm)   //promise对象
         // 利用async和await可以简化操作，使promis对象直接变成一个普通对象。
         // const ret = await this.$http.post('/login', this.loginForm)  //普通对象
         // 解构得到我们需要的值
-        const { data: res } = await this.$http.post("/login", this.loginForm);
+        const { data: res } = await this.$http.post('/login', this.loginForm)
         // 获取axios请求返回的状态码，判断登录是否成功
-        if (res.meta.status !== 200) return this.$message.error("登录失败！");
-        this.$message.success("登录成功");
+        if (res.meta.status !== 200) return this.$message.error('登录失败！')
+        this.$message.success('登录成功')
         // 获取axios请求返回的token值并保存在sessionstorage里面。
-        window.sessionStorage.setItem("token", res.data.token);
+        window.sessionStorage.setItem('token', res.data.token)
         // 2. 通过编程式导航跳转到后台主页，$router是某个过程自动添加的方法！
-        this.$router.push("/home");
-      });
+        this.$router.push('/home')
+      })
     }
   }
-};
+}
 </script>
 
 <style lang="less" scoped>
