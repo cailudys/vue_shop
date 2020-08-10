@@ -97,6 +97,16 @@ export default {
         // 2. 通过编程式导航跳转到后台主页，$router是某个过程自动添加的方法！
         this.$router.push('/home')
       })
+    },
+    // 根据ID删除对应的用户信息
+    removeUserById(id) {
+      // 弹框询问用户是否删除数据
+      const res = this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      console.log(res)
     }
   }
 }
