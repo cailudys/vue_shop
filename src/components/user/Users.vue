@@ -76,6 +76,7 @@
                 type="warning"
                 icon="el-icon-setting"
                 size="mini"
+                @click="setRole(scope.row)"
               ></el-button>
             </el-tooltip>
           </template>
@@ -146,6 +147,35 @@
         <el-button type="primary">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 分配角色的对话框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="50%"
+      @close="steRoleDialogClosed"
+    >
+      <div>
+        <p>当前的用户：{{ userInfo.username }}</p>
+        <p>当前的角色：{{ userInfo.role_name }}</p>
+        <p>
+          分配新角色：
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+      </span>
+    </el-dialog>
+
     <!-- 分页区域 -->
     <el-pagination
       @size-change="handleSizeChange"
@@ -186,8 +216,9 @@ export default {
 
       cb(new Error('请输入合法的手机号'))
     }
-    // 获取用户列表参数的对象
+    // 为什么有些是写在return括号里的，而有些是不用的？
     return {
+      // 保存查询用户列表所需的参数
       queryInfo: {
         // 接口中提示query的值可以为空
         query: '',
@@ -196,7 +227,9 @@ export default {
         // 当前每页显示多少条数据
         pagesize: 2
       },
+      // 保存用户列表数据
       userlist: [],
+      // 保存总计
       total: 0,
       // 控制对话框的显示与隐藏
       addDialogVisible: false,
@@ -254,7 +287,15 @@ export default {
           { required: true, message: '请输入用户手机', trigger: 'blur' },
           { validator: checkMobile, trigger: 'blur' }
         ]
-      }
+      },
+      // 隐藏分配角色对话框
+      setRoleDialogVisible: false,
+      // 需要被分配角色的用户信息
+      userInfo: {},
+      // 角色列表数据
+      rolesList: [],
+      // 已选中的id值
+      selectedRoleId: ' '
     }
   },
   created() {
@@ -263,7 +304,7 @@ export default {
   methods: {
     // 前端写的功能，只需要写发送请求和接收请求的代码！
     // 服务器如何处理我们的请求是不用考虑的（后端提供API
-
+    // 获取用户列表数据
     async getUserList() {
       // axios传参是固定写法
       const { data: res } = await this.$http.get('users', {
@@ -389,6 +430,44 @@ export default {
 
       this.$message.success('删除用户成功！')
       this.getUserList()
+    },
+    // 展示分配角色的对话框
+    async setRole(userInfo) {
+      this.userInfo = userInfo
+      // 在显示对话框之前，获得所有的角色列表
+      const { data: res } = await this.$http.get('roles')
+      if (res.meta.status !== 200) {
+        return this.$message.error('获取角色列表失败！')
+      }
+
+      this.rolesList = res.data
+      this.setRoleDialogVisible = true
+    },
+    // 点击按钮，分配角色
+    async saveRoleInfo() {
+      if (!this.selectedRoleId) {
+        return this.$message.error('请选择要分配的角色！')
+      }
+
+      const { data: res } = await this.$http.put(
+        `users/${this.userInfo.id}/role`,
+        {
+          rid: this.selectedRoleId
+        }
+      )
+
+      if (res.meta.status !== 200) {
+        return this.$message.error('更新角色失败！')
+      }
+
+      this.$message.success('更新角色成功')
+      this.getUserList()
+      this.setRoleDialogVisible = false
+    },
+    // 监听分配角色对话框的关闭事件
+    steRoleDialogClosed() {
+      this.selectedRoleId = ''
+      this.userInfo = {}
     }
   }
 }
